@@ -4,6 +4,8 @@ Dictionary type
 */
 package collection
 
+import "fmt"
+
 /*
 Interface for a dictionary.
 
@@ -282,7 +284,13 @@ func (ego *mapDict[K, V]) getVal() map[K]V {
 
 func (ego *mapDict[K, V]) assert() {
 	if ego == nil || ego.getVal() == nil {
-		panic("The dictionary is not initialized.")
+		panic("dictionary is not initialized")
+	}
+}
+
+func (ego *mapDict[K, V]) checkKey(key K) {
+	if !ego.KeyExists(key) {
+		panic(fmt.Sprintf("key %s does not exist", toString(key)))
 	}
 }
 
@@ -295,9 +303,7 @@ func (ego *mapDict[K, V]) Set(key K, value V) Dict[K, V] {
 func (ego *mapDict[K, V]) Unset(keys ...K) Dict[K, V] {
 	ego.assert()
 	for _, key := range keys {
-		if !ego.KeyExists(key) {
-			panic("The Dictionary does not contain the key " + toString(key) + ".")
-		}
+		ego.checkKey(key)
 		delete(ego.getVal(), key)
 	}
 	return ego
@@ -311,9 +317,7 @@ func (ego *mapDict[K, V]) Clear() Dict[K, V] {
 
 func (ego *mapDict[K, V]) Get(key K) V {
 	ego.assert()
-	if !ego.KeyExists(key) {
-		panic("The Dictionary does not contain the key " + toString(key) + ".")
-	}
+	ego.checkKey(key)
 	return ego.getVal()[key]
 }
 
@@ -415,7 +419,7 @@ func (ego *mapDict[K, V]) KeyOf(value V) K {
 			return key
 		}
 	}
-	panic("The dictionary does not contain the value " + toString(value) + ".")
+	panic(fmt.Sprintf("value %s not found", toString(value)))
 }
 
 func (ego *mapDict[K, V]) KeyExists(key K) bool {

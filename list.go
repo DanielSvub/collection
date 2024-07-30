@@ -5,9 +5,9 @@ List type
 package collection
 
 import (
+	"fmt"
 	"math"
 	"sort"
-	"strconv"
 )
 
 /*
@@ -213,18 +213,6 @@ type List[T comparable] interface {
 	IndexOf(elem T) int
 
 	/*
-		Searches for an element satisfying a condition.
-		The function has one parameter, the current element, and returns bool.
-
-		Parameters:
-		  - fn - anonymous function to be executed.
-
-		Returns:
-		  - pointer to the first element of the list satisfying the condition, nil if no such item.
-	*/
-	Search(fn func(x T) bool) *T
-
-	/*
 		Reverses the order of elements in the list.
 
 		Returns:
@@ -418,13 +406,13 @@ func (ego *sliceList[T]) getVal() []T {
 
 func (ego *sliceList[T]) assert() {
 	if ego == nil || ego.getVal() == nil {
-		panic("The list is not initialized.")
+		panic("list is not initialized.")
 	}
 }
 
 func (ego *sliceList[T]) indexCheck(index int) {
-	if index < 0 || index > ego.Count() {
-		panic("Index " + strconv.Itoa(index) + " out of range.")
+	if index < 0 || index >= ego.Count() {
+		panic(fmt.Sprintf("index %d out of range with count %d", index, ego.Count()))
 	}
 }
 
@@ -438,10 +426,10 @@ func (ego *sliceList[T]) Add(values ...T) List[T] {
 
 func (ego *sliceList[T]) Insert(index int, value T) List[T] {
 	ego.assert()
-	ego.indexCheck(index)
 	if index == ego.Count() {
 		return ego.Add(value)
 	}
+	ego.indexCheck(index)
 	ego.val = append(ego.getVal()[:index+1], ego.getVal()[index:]...)
 	ego.getVal()[index] = value
 	return ego
@@ -470,7 +458,7 @@ func (ego *sliceList[T]) Delete(indexes ...int) List[T] {
 func (ego *sliceList[T]) Pop() T {
 	count := ego.Count()
 	if count == 0 {
-		panic("Cannot pop from an empty list.")
+		panic("cannot pop from an empty list")
 	}
 	last := ego.Count() - 1
 	elem := ego.getVal()[last]
@@ -540,14 +528,17 @@ func (ego *sliceList[T]) Concat(another List[T]) List[T] {
 
 func (ego *sliceList[T]) SubList(start int, end int) List[T] {
 	ego.assert()
+	if end > ego.Count() || end < -ego.Count() {
+		panic(fmt.Sprintf("ending index %d out of range with count %d", end, ego.Count()))
+	}
 	if end <= 0 {
 		end = ego.Count() + end
 	}
 	if start > end {
-		panic("Starting index higher than ending index.")
+		panic("starting index is higher than the ending index")
 	}
-	if ego.Count() < end || start < 0 {
-		panic("Indexes out of range.")
+	if start < 0 {
+		panic("starting index is lower than zero")
 	}
 	list := &sliceList[T]{make([]T, end-start)}
 	copy(list.getVal(), ego.getVal()[start:end])
@@ -572,16 +563,6 @@ func (ego *sliceList[T]) IndexOf(elem T) int {
 		}
 	}
 	return -1
-}
-
-func (ego *sliceList[T]) Search(fn func(elem T) bool) *T {
-	ego.assert()
-	for _, item := range ego.getVal() {
-		if fn(item) {
-			return &item
-		}
-	}
-	return nil
 }
 
 func (ego *sliceList[T]) Reverse() List[T] {
@@ -640,18 +621,18 @@ func (ego *sliceList[T]) Sort() List[T] {
 	case []float64:
 		sort.Float64s(val)
 	default:
-		panic("Unsortable list.")
+		panic("unsortable list")
 	}
 	return ego
 }
 
 func (ego *sliceList[T]) Min() float64 {
-	if ego.Empty() {
-		return 0
-	}
 	min := math.MaxFloat64
 	switch val := any(ego.getVal()).(type) {
 	case []int:
+		if len(val) == 0 {
+			return 0
+		}
 		for _, item := range val {
 			float := float64(item)
 			if float < min {
@@ -659,24 +640,27 @@ func (ego *sliceList[T]) Min() float64 {
 			}
 		}
 	case []float64:
+		if len(val) == 0 {
+			return 0
+		}
 		for _, item := range val {
 			if item < min {
 				min = item
 			}
 		}
 	default:
-		panic("The list is not numeric.")
+		panic("list elements type is neither int or float64")
 	}
 	return min
 }
 
 func (ego *sliceList[T]) Max() float64 {
-	if ego.Empty() {
-		return 0
-	}
 	max := -math.MaxFloat64
 	switch val := any(ego.getVal()).(type) {
 	case []int:
+		if len(val) == 0 {
+			return 0
+		}
 		for _, item := range val {
 			float := float64(item)
 			if float > max {
@@ -684,53 +668,62 @@ func (ego *sliceList[T]) Max() float64 {
 			}
 		}
 	case []float64:
+		if len(val) == 0 {
+			return 0
+		}
 		for _, item := range val {
 			if item > max {
 				max = item
 			}
 		}
 	default:
-		panic("The list is not numeric.")
+		panic("list elements type is neither int or float64")
 	}
 	return max
 }
 
 func (ego *sliceList[T]) Sum() float64 {
-	if ego.Empty() {
-		return 0
-	}
 	var sum float64
 	switch val := any(ego.getVal()).(type) {
 	case []int:
+		if len(val) == 0 {
+			return 0
+		}
 		for _, item := range val {
 			sum += float64(item)
 		}
 	case []float64:
+		if len(val) == 0 {
+			return 0
+		}
 		for _, item := range val {
 			sum += item
 		}
 	default:
-		panic("The list is not numeric.")
+		panic("list elements type is neither int or float64")
 	}
 	return sum
 }
 
 func (ego *sliceList[T]) Prod() float64 {
-	if ego.Empty() {
-		return 0
-	}
 	var prod float64 = 1
 	switch val := any(ego.getVal()).(type) {
 	case []int:
+		if len(val) == 0 {
+			return 0
+		}
 		for _, item := range val {
 			prod *= float64(item)
 		}
 	case []float64:
+		if len(val) == 0 {
+			return 0
+		}
 		for _, item := range val {
 			prod *= item
 		}
 	default:
-		panic("The list is not numeric.")
+		panic("list elements type is neither int or float64")
 	}
 	return prod
 }

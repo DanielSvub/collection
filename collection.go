@@ -4,7 +4,10 @@ Additional tools
 */
 package collection
 
-import "strconv"
+import (
+	"fmt"
+	"strconv"
+)
 
 /*
 Converts a value of any type to string.
@@ -17,56 +20,38 @@ Returns:
 */
 func toString(value any) string {
 	switch val := any(value).(type) {
+	case nil:
+		return "null"
 	case string:
-		return `"` + val + `"`
+		return strconv.Quote(val)
 	case bool:
 		return strconv.FormatBool(val)
 	case int:
 		return strconv.Itoa(val)
+	case int64:
+		return strconv.FormatInt(val, 10)
+	case int32:
+		return strconv.FormatInt(int64(val), 10)
+	case int16:
+		return strconv.FormatInt(int64(val), 10)
+	case int8:
+		return strconv.FormatInt(int64(val), 10)
+	case uint64:
+		return strconv.FormatUint(val, 10)
+	case uint32:
+		return strconv.FormatUint(uint64(val), 10)
+	case uint16:
+		return strconv.FormatUint(uint64(val), 10)
+	case uint8:
+		return strconv.FormatUint(uint64(val), 10)
 	case float64:
 		return strconv.FormatFloat(val, 'f', -1, 64)
-	case List[string]:
-		return val.String()
-	case List[bool]:
-		return val.String()
-	case List[int]:
-		return val.String()
-	case List[float64]:
-		return val.String()
-	case Dict[string, string]:
-		return val.String()
-	case Dict[string, bool]:
-		return val.String()
-	case Dict[string, int]:
-		return val.String()
-	case Dict[string, float64]:
-		return val.String()
-	case Dict[bool, string]:
-		return val.String()
-	case Dict[bool, bool]:
-		return val.String()
-	case Dict[bool, int]:
-		return val.String()
-	case Dict[bool, float64]:
-		return val.String()
-	case Dict[int, string]:
-		return val.String()
-	case Dict[int, bool]:
-		return val.String()
-	case Dict[int, int]:
-		return val.String()
-	case Dict[int, float64]:
-		return val.String()
-	case Dict[float64, string]:
-		return val.String()
-	case Dict[float64, bool]:
-		return val.String()
-	case Dict[float64, int]:
-		return val.String()
-	case Dict[float64, float64]:
+	case float32:
+		return strconv.FormatFloat(float64(val), 'f', -1, 32)
+	case fmt.Stringer:
 		return val.String()
 	default:
-		panic("Value cannot be converted to string.")
+		return fmt.Sprintf("%+v", val)
 	}
 }
 
