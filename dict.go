@@ -7,7 +7,7 @@ package collection
 import "fmt"
 
 /*
-Interface for a dictionary.
+Dictionary, unordered set of key-value pairs.
 
 Type parameters:
   - K - type of dictionary keys,
@@ -29,12 +29,20 @@ type Dict[K comparable, V comparable] interface {
 	assert()
 
 	/*
-		Sets the values of the fields of the dictionary.
-		If the key already exists, the value is overwritten, if not, a new field is created.
-		If one key is given multiple times, the value is set to the last one.
+		Panics if the given key does not exist.
 
 		Parameters:
-		  - values... - any amount of key-value pairs to set.
+		  - key - key to check.
+	*/
+	checkKey(key K)
+
+	/*
+		Sets the value of the field of the dictionary.
+		If the key already exists, the value is overwritten, if not, a new field is created.
+
+		Parameters:
+		  - key - key to set,
+		  - value - new value to be set.
 
 		Returns:
 		  - updated dictionary.
@@ -53,7 +61,7 @@ type Dict[K comparable, V comparable] interface {
 	Unset(keys ...K) Dict[K, V]
 
 	/*
-		Deletes all fields of the dictionary.
+		Deletes all fields in the dictionary.
 
 		Returns:
 		  - updated dictionary.
@@ -72,11 +80,12 @@ type Dict[K comparable, V comparable] interface {
 	Get(key K) V
 
 	/*
-		Serializes the dictionary into the JSON format.
+		Serializes the dictionary.
+		If only compatible types are used, the output will be a valid JSON.
 		Can be called recursively.
 
 		Returns:
-		  - string representing serialized dictionary.
+		  - string representing the serialized dictionary.
 	*/
 	String() string
 
@@ -105,7 +114,7 @@ type Dict[K comparable, V comparable] interface {
 	Values() List[V]
 
 	/*
-		Creates a deep copy of the dictionary.
+		Creates a copy of the dictionary.
 
 		Returns:
 		  - copied dictionary.
@@ -113,7 +122,7 @@ type Dict[K comparable, V comparable] interface {
 	Clone() Dict[K, V]
 
 	/*
-		Gives a number of fields of the dictionary.
+		Gives a number of fields in the dictionary.
 
 		Returns:
 		  - number of fields.
@@ -166,7 +175,7 @@ type Dict[K comparable, V comparable] interface {
 
 	/*
 		Checks if the dictionary contains a field with a given value.
-		Dictionaries and lists are compared by reference.
+		Nested dictionaries and lists are compared by reference.
 
 		Parameters:
 		  - value - the value to check.
@@ -174,10 +183,10 @@ type Dict[K comparable, V comparable] interface {
 		Returns:
 		  - true if the dictionary contains the value, false otherwise.
 	*/
-	Contains(elem V) bool
+	Contains(value V) bool
 
 	/*
-		Gives a key containing a given value.
+		Gives a key containing the given value.
 		If multiple keys contain the value, any of them is returned.
 		Panics if the key does not exist.
 
@@ -187,7 +196,7 @@ type Dict[K comparable, V comparable] interface {
 		Returns:
 		  - key for the value.
 	*/
-	KeyOf(elem V) K
+	KeyOf(value V) K
 
 	/*
 		Checks if a given key exists within the dictionary.
@@ -214,7 +223,7 @@ type Dict[K comparable, V comparable] interface {
 
 	/*
 		Copies the dictionary and modifies each field by a given mapping function.
-		The resulting element has to be of a same type as the original one.
+		The resulting field has to be of a same type as the original one.
 		The function has two parameters: key of the current field and its value.
 		The old dictionary remains unchanged.
 
@@ -231,7 +240,7 @@ type Dict[K comparable, V comparable] interface {
 Dictionary, a reference type. Contains a map of key-value pairs.
 
 Implements:
-  - Dicter.
+  - Dict.
 
 Type parameters:
   - K - type of dictionary keys,
@@ -244,9 +253,6 @@ type mapDict[K comparable, V comparable] struct {
 /*
 Dictionary constructor.
 Creates a new dictionary.
-
-Parameters:
-  - values... - any amount of key-value pairs to set after the dictionary creation.
 
 Type parameters:
   - K - type of dictionary keys,
@@ -262,10 +268,10 @@ func NewDict[K comparable, V comparable]() Dict[K, V] {
 
 /*
 Dictionary constructor.
-Converts a map of supported types to a dictionary.
+Converts a map to a dictionary.
 
 Parameters:
-  - dict - original map.
+  - goMap - original map.
 
 Type parameters:
   - K - type of dictionary keys,
@@ -274,7 +280,7 @@ Type parameters:
 Returns:
   - pointer to the created dictionary.
 */
-func NewDictFrom[K comparable, V comparable](goMap map[K]V) *mapDict[K, V] {
+func NewDictFrom[K comparable, V comparable](goMap map[K]V) Dict[K, V] {
 	return &mapDict[K, V]{goMap}
 }
 

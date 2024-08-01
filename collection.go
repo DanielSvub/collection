@@ -56,31 +56,6 @@ func toString(value any) string {
 }
 
 /*
-Copies a list and modifies each element by a given mapping function.
-The resulting element can be of a different type than the original one.
-The function has one parameter, the current element.
-The old list remains unchanged.
-
-Parameters:
-  - list - old list,
-  - function - anonymous function to be executed.
-
-Type parameters:
-  - T - type of old list elements,
-  - N - type of new list elements.
-
-Returns:
-  - new list.
-*/
-func MapList[T comparable, N comparable](list List[T], function func(x T) N) List[N] {
-	new := NewList[N]()
-	list.ForEach(func(value T) {
-		new.Add(function(value))
-	})
-	return new
-}
-
-/*
 Copies a dictionary and modifies each field by a given mapping function.
 The resulting element can be of a different type than the original one.
 The function has two parameters: key of the current field and its value.
@@ -98,10 +73,35 @@ Type parameters:
 Returns:
   - new dictionary.
 */
-func MapDict[K comparable, V comparable, N comparable](dict Dict[K, V], function func(k K, v V) N) Dict[K, N] {
+func MapDict[K comparable, V comparable, N comparable](dict Dict[K, V], function func(K, V) N) Dict[K, N] {
 	new := NewDict[K, N]()
 	dict.ForEach(func(key K, value V) {
 		new.Set(key, function(key, value))
+	})
+	return new
+}
+
+/*
+Copies a list and modifies each element by a given mapping function.
+The resulting element can be of a different type than the original one.
+The function has one parameter, the current element.
+The old list remains unchanged.
+
+Parameters:
+  - list - old list,
+  - function - anonymous function to be executed.
+
+Type parameters:
+  - T - type of old list elements,
+  - N - type of new list elements.
+
+Returns:
+  - new list.
+*/
+func MapList[T comparable, N comparable](list List[T], function func(T) N) List[N] {
+	new := NewList[N]()
+	list.ForEach(func(value T) {
+		new.Add(function(value))
 	})
 	return new
 }

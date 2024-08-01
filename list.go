@@ -11,7 +11,7 @@ import (
 )
 
 /*
-Interface for a list.
+List, an ordered sequence of elements.
 
 Type parameters:
   - T - type of list elements.
@@ -110,7 +110,8 @@ type List[T comparable] interface {
 	Get(index int) T
 
 	/*
-		Serializes the list into the JSON format.
+		Serializes the list.
+		If only compatible types are used, the output will be a valid JSON.
 		Can be called recursively.
 
 		Returns:
@@ -275,7 +276,7 @@ type List[T comparable] interface {
 
 	/*
 		Sorts the elements in the list (ascending).
-		Only lists of strings, ints and floats are sortable.
+		Only lists of types string, int and float64 are sortable.
 
 		Returns:
 		  - updated list.
@@ -284,7 +285,7 @@ type List[T comparable] interface {
 
 	/*
 		Finds a minimum of the list.
-		The list has to be numeric.
+		The list has to be either of type int or float64.
 
 		Returns:
 		  - found minimum.
@@ -293,7 +294,7 @@ type List[T comparable] interface {
 
 	/*
 		Finds a maximum of the list.
-		The list has to be numeric.
+		The list has to be either of type int or float64.
 
 		Returns:
 		  - found maximum.
@@ -302,7 +303,7 @@ type List[T comparable] interface {
 
 	/*
 		Computes a sum of the list.
-		The list has to be numeric.
+		The list has to be either of type int or float64.
 
 		Returns:
 		  - sum of the elements.
@@ -311,7 +312,7 @@ type List[T comparable] interface {
 
 	/*
 		Computes a product of the list.
-		The list has to be numeric.
+		The list has to be either of type int or float64.
 
 		Returns:
 		  - product of the elements.
@@ -320,7 +321,7 @@ type List[T comparable] interface {
 
 	/*
 		Computes an avarage of the list.
-		The list has to be numeric.
+		The list has to be either of type int or float64.
 
 		Returns:
 		  - average of the elements.
@@ -375,7 +376,7 @@ Type parameters:
 Returns:
   - pointer to the created list.
 */
-func NewListOf[T comparable](value T, count int) *sliceList[T] {
+func NewListOf[T comparable](value T, count int) List[T] {
 	ego := sliceList[T]{make([]T, count)}
 	for i := 0; i < count; i++ {
 		ego.getVal()[i] = value
@@ -396,7 +397,7 @@ Type parameters:
 Returns:
   - pointer to the created list.
 */
-func NewListFrom[T comparable](goSlice []T) *sliceList[T] {
+func NewListFrom[T comparable](goSlice []T) List[T] {
 	return &sliceList[T]{goSlice}
 }
 
@@ -649,7 +650,7 @@ func (ego *sliceList[T]) Min() float64 {
 			}
 		}
 	default:
-		panic("list elements type is neither int or float64")
+		panic("list type is neither int or float64")
 	}
 	return min
 }
@@ -677,7 +678,7 @@ func (ego *sliceList[T]) Max() float64 {
 			}
 		}
 	default:
-		panic("list elements type is neither int or float64")
+		panic("list type is neither int or float64")
 	}
 	return max
 }
@@ -700,7 +701,7 @@ func (ego *sliceList[T]) Sum() float64 {
 			sum += item
 		}
 	default:
-		panic("list elements type is neither int or float64")
+		panic("list type is neither int or float64")
 	}
 	return sum
 }
@@ -723,7 +724,7 @@ func (ego *sliceList[T]) Prod() float64 {
 			prod *= item
 		}
 	default:
-		panic("list elements type is neither int or float64")
+		panic("list type is neither int or float64")
 	}
 	return prod
 }
